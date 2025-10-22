@@ -1,11 +1,21 @@
 pipeline {
     agent { label 'debian-agent' }
 
-    triggers {
-        pollSCM('H/1 * * * *')
-    }
-
     stages {
+        stage('Esperar webhook') {
+            steps {
+                script {
+                    // Registrar un webhook temporal
+                    def hook = registerWebhook()
+                    echo "Esperando POST en ${hook.url}"
+                    
+                    // Espera hasta que se reciba un POST en esa URL
+                    def data = waitForWebhook(hook)
+                    echo "Webhook recibido con datos: ${data}"
+                }
+            }
+        }
+
         stage('Preparar entorno') {
             steps {
                 echo 'Iniciando pipeline...'
@@ -40,4 +50,3 @@ pipeline {
         }
     }
 }
-
