@@ -1,8 +1,3 @@
-FROM ubuntu:latest
+FROM nginx:latest
+COPY index.html /usr/share/nginx/html/index.html
 
-RUN apt update && apt install -y curl
-
-COPY . /app
-WORKDIR /app
-
-CMD ["bash"]
