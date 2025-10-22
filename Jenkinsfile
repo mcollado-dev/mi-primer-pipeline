@@ -1,29 +1,43 @@
 pipeline {
-    agent any
+    agent { label 'debian-agent' }
+
+    triggers {
+        pollSCM('H/1 * * * *')
+    }
 
     stages {
         stage('Preparar entorno') {
             steps {
                 echo 'Iniciando pipeline...'
+                sh 'docker --version'
             }
         }
 
         stage('Construir imagen Docker') {
             steps {
+                echo 'Construyendo imagen Docker...'
                 sh 'docker build -t miapp:latest .'
             }
         }
 
-        stage('Ejecutar contenedor') {
+        stage('Desplegar contenedor') {
             steps {
-                sh 'docker run -d --name miapp -p 8081:8080 miapp:latest || echo "Contenedor ya existe"'
+                echo 'Desplegando contenedor...'
+                sh '''
+                    docker rm -f miapp || true
+                    docker run -d -p 8080:80 --name miapp miapp:latest
+                '''
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline finalizado.'
+        success {
+            echo 'Despliegue completado con éxito'
+        }
+        failure {
+            echo 'Algo ha fallado en el pipeline'
         }
     }
 }
+
