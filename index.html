@@ -1,11 +1,65 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Mi App desplegada con Jenkins</title>
-  </head>
-  <body style="font-family: Arial; text-align: center; margin-top: 100px;">
-    <h1>¡Hola desde Jenkins + Docker + Debian Agent!</h1>
-    <p>Si ves esto, el despliegue se hizo correctamente y se actualiza cada minuto y va bien :)</p>
-  </body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi App desplegada con Jenkins</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+    }
+
+    p {
+      font-size: 1.3em;
+      max-width: 600px;
+      line-height: 1.5;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 0.9em;
+      color: rgba(255,255,255,0.7);
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 12px 25px;
+      font-size: 1em;
+      border: none;
+      border-radius: 5px;
+      background-color: #ff7e5f;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #feb47b;
+    }
+  </style>
+</head>
+<body>
+  <h1>¡Hola desde Jenkins + Docker + Debian Agent!</h1>
+  <p>Si ves esto, el despliegue se hizo correctamente. Cada minuto se actualiza automáticamente y todo funciona de maravilla.</p>
+  <button onclick="alert('¡Tu despliegue es un éxito!')">Verificar despliegue</button>
+  <div class="footer">Desarrollado por Manuel Collado Ponce de León</div>
+</body>
 </html>
+
