@@ -1,10 +1,7 @@
-
 pipeline {
     agent { label 'debian-agent' }
 
     environment {
-        SONAR_TOKEN = credentials('sonar-token')
-        SONARQUBE_URL = 'http://192.168.56.104:9000'
         DEPLOY_USER = 'manuelcollado'
         DEPLOY_HOST = '192.168.56.102'
     }
@@ -20,13 +17,14 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo 'Ejecutando análisis SonarQube...'
-                withSonarQubeEnv('SonarQube') {
+                // El nombre aquí debe coincidir exactamente con la instalación en Jenkins
+                withSonarQubeEnv('SonarQube-Local') {
                     sh """
                     sonar-scanner \
                         -Dsonar.projectKey=miapp \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=${SONARQUBE_URL} \
-                        -Dsonar.login=${SONAR_TOKEN}
+                        -Dsonar.host.url=${SONAR_HOST_URL} \
+                        -Dsonar.login=${SONAR_AUTH_TOKEN}
                     """
                 }
             }
