@@ -17,17 +17,18 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo 'Ejecutando análisis SonarQube...'
-                // El nombre aquí debe coincidir con tu instalación de SonarQube en Configure System
-                withSonarQubeEnv('SonarQube-Local') {
-                    // Usamos la herramienta SonarScanner gestionada por Jenkins
-                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=miapp \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=${SONAR_HOST_URL} \
-                            -Dsonar.login=${SONAR_AUTH_TOKEN}
-                    """
+                withSonarQubeEnv('SonarQube-Local') { // Usa tu instalación de SonarQube configurada
+                    script {
+                        // Usamos la herramienta SonarScanner gestionada por Jenkins
+                        def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                                -Dsonar.projectKey=miapp \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=${SONAR_HOST_URL} \
+                                -Dsonar.login=${SONAR_AUTH_TOKEN}
+                        """
+                    }
                 }
             }
         }
@@ -36,9 +37,11 @@ pipeline {
             steps {
                 echo 'Construyendo imagen Docker...'
                 sh '''
+                    # Limpiar contenedor e imagen anteriores
                     docker rm -f miapp || true
                     docker rmi -f miapp:latest || true
-                    docker builder prune -af || true
+
+                    # Construir nueva imagen sin usar cache
                     docker build --no-cache -t miapp:latest .
                 '''
             }
@@ -82,3 +85,4 @@ EOF
         }
     }
 }
+
