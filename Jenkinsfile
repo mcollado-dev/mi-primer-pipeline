@@ -17,14 +17,16 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo 'Ejecutando análisis SonarQube...'
-                // El nombre aquí debe coincidir exactamente con la instalación en Jenkins
+                // El nombre aquí debe coincidir con tu instalación de SonarQube en Configure System
                 withSonarQubeEnv('SonarQube-Local') {
+                    // Usamos la herramienta SonarScanner gestionada por Jenkins
+                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                     sh """
-                    sonar-scanner \
-                        -Dsonar.projectKey=miapp \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=${SONAR_HOST_URL} \
-                        -Dsonar.login=${SONAR_AUTH_TOKEN}
+                        ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=miapp \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_AUTH_TOKEN}
                     """
                 }
             }
@@ -34,10 +36,10 @@ pipeline {
             steps {
                 echo 'Construyendo imagen Docker...'
                 sh '''
-                docker rm -f miapp || true
-                docker rmi -f miapp:latest || true
-                docker builder prune -af || true
-                docker build --no-cache -t miapp:latest .
+                    docker rm -f miapp || true
+                    docker rmi -f miapp:latest || true
+                    docker builder prune -af || true
+                    docker build --no-cache -t miapp:latest .
                 '''
             }
         }
@@ -46,14 +48,14 @@ pipeline {
             steps {
                 echo 'Desplegando en DebianMiApp...'
                 sh '''
-                echo "==> Verificando conexión SSH..."
-                ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "echo 'Conexión SSH correcta'"
+                    echo "==> Verificando conexión SSH..."
+                    ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} "echo 'Conexión SSH correcta'"
 
-                echo "==> Enviando imagen Docker..."
-                docker save miapp:latest | bzip2 | ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'bunzip2 | docker load'
+                    echo "==> Enviando imagen Docker..."
+                    docker save miapp:latest | bzip2 | ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} 'bunzip2 | docker load'
 
-                echo "==> Lanzando contenedor remoto..."
-                ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} <<'EOF'
+                    echo "==> Lanzando contenedor remoto..."
+                    ssh -o StrictHostKeyChecking=no ${DEPLOY_USER}@${DEPLOY_HOST} <<'EOF'
 docker rm -f miapp || true
 docker run -d -p 8080:80 --name miapp miapp:latest
 EOF
