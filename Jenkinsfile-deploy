@@ -21,7 +21,7 @@ pipeline {
 
         stage('Configurar Base de Datos') {
             steps {
-                echo "🧩 Configurando base de datos en ${DB_HOST}..."
+                echo "Configurando base de datos en ${DB_HOST}..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${DB_HOST} '
                         sshpass -p "${ROOT_PASS}" su -c "
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Desplegar WordPress') {
             steps {
-                echo "🌐 Instalando y configurando WordPress en ${WEB_HOST}..."
+                echo "Instalando y configurando WordPress en ${WEB_HOST}..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
                         sshpass -p "${ROOT_PASS}" su -c "
@@ -64,10 +64,10 @@ pipeline {
 
         stage('Verificar Despliegue') {
             steps {
-                echo "🧪 Verificando que WordPress responde correctamente..."
+                echo "Verificando que WordPress responde correctamente..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                        curl -I http://localhost/wordpress | grep "200 OK" && echo "✅ WordPress responde correctamente."
+                        curl -I http://localhost/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
                     '
                 """
             }
@@ -76,10 +76,10 @@ pipeline {
 
     post {
         success {
-            echo "🎉 Despliegue de WordPress completado y conectado a MariaDB correctamente."
+            echo "Despliegue de WordPress completado y conectado a MariaDB correctamente."
         }
         failure {
-            echo "❌ Falló el despliegue. Revisa los logs del pipeline en Jenkins."
+            echo "Falló el despliegue. Revisa los logs del pipeline en Jenkins."
         }
     }
 }
