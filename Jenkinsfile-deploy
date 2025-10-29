@@ -11,56 +11,60 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                echo 'Clonando repositorio...'
+                checkout scm
+            }
+        }
+
         stage('Configurar Base de Datos') {
             steps {
-                sshagent(['ssh-debian-agent']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${DB_HOST} '
-                            sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
-                            sudo mysql -e "CREATE USER IF NOT EXISTS \\"${DB_USER}\\"@\\"%\\" IDENTIFIED BY \\"${DB_PASS}\\";"
-                            sudo mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO \\"${DB_USER}\\"@\\"%\\";"
-                            sudo mysql -e "FLUSH PRIVILEGES;"
-                        '
-                    """
-                }
+                echo "Configurando base de datos en ${DB_HOST}..."
+                sh """
+                    ssh -o StrictHostKeyChecking=no ${SSH_USER}@${DB_HOST} '
+                        sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
+                        sudo mysql -e "CREATE USER IF NOT EXISTS \\"${DB_USER}\\"@\\"%\\" IDENTIFIED BY \\"${DB_PASS}\\";"
+                        sudo mysql -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO \\"${DB_USER}\\"@\\"%\\";"
+                        sudo mysql -e "FLUSH PRIVILEGES;"
+                    '
+                """
             }
         }
 
         stage('Desplegar WordPress') {
             steps {
-                sshagent(['ssh-debian-agent']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                            sudo apt update
-                            sudo apt install -y apache2 php php-mysql wget unzip
-                            cd /var/www/html
-                            sudo rm -rf wordpress
-                            sudo wget https://wordpress.org/latest.zip
-                            sudo unzip latest.zip
-                            sudo rm latest.zip
-                            sudo chown -R www-data:www-data wordpress
-                            cd wordpress
-                            sudo cp wp-config-sample.php wp-config.php
-                            sudo sed -i "s/database_name_here/${DB_NAME}/" wp-config.php
-                            sudo sed -i "s/username_here/${DB_USER}/" wp-config.php
-                            sudo sed -i "s/password_here/${DB_PASS}/" wp-config.php
-                            sudo sed -i "s/localhost/${DB_HOST}/" wp-config.php
-                            sudo systemctl restart apache2
-                        '
-                    """
-                }
+                echo "Instalando y configurando WordPress en ${WEB_HOST}..."
+                sh """
+                    ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
+                        sudo apt update
+                        sudo apt install -y apache2 php php-mysql wget unzip
+                        cd /var/www/html
+                        sudo rm -rf wordpress
+                        sudo wget https://wordpress.org/latest.zip
+                        sudo unzip latest.zip
+                        sudo rm latest.zip
+                        sudo chown -R www-data:www-data wordpress
+                        cd wordpress
+                        sudo cp wp-config-sample.php wp-config.php
+                        sudo sed -i "s/database_name_here/${DB_NAME}/" wp-config.php
+                        sudo sed -i "s/username_here/${DB_USER}/" wp-config.php
+                        sudo sed -i "s/password_here/${DB_PASS}/" wp-config.php
+                        sudo sed -i "s/localhost/${DB_HOST}/" wp-config.php
+                        sudo systemctl restart apache2
+                    '
+                """
             }
         }
 
         stage('Verificar Despliegue') {
             steps {
-                sshagent(['ssh-debian-agent']) {
-                    sh """
-                        ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                            curl -I http://localhost/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
-                        '
-                    """
-                }
+                echo "Verificando que WordPress responde correctamente..."
+                sh """
+                    ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
+                        curl -I http://localhost/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
+                    '
+                """
             }
         }
     }
