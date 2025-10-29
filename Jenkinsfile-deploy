@@ -74,7 +74,7 @@ EOF
                 echo "Verificando que WordPress responde correctamente..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                        curl -I http://localhost/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
+                        curl -I http://192.168.56.106/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
                     '
                 """
             }
