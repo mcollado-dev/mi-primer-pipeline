@@ -8,7 +8,7 @@ pipeline {
         DB_PASS  = 'wp_pass'
         DB_NAME  = 'wordpress_db'
         SSH_USER = 'manuelcollado'
-        ROOT_PASS = 'PapayMama2016'
+        ROOT_PASS = 'PapayMmama2016'
     }
 
     stages {
@@ -24,7 +24,7 @@ pipeline {
                 echo "Configurando base de datos en ${DB_HOST}..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${DB_HOST} '
-                        sshpass -p "${ROOT_PASS}" su -c "
+                        sshpass -p "${ROOT_PASS}" su - -c "
                             mysql -e \\"CREATE DATABASE IF NOT EXISTS ${DB_NAME};\\"
                             mysql -e \\"CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASS}';\\"
                             mysql -e \\"GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'%';\\"
@@ -40,7 +40,7 @@ pipeline {
                 echo "Instalando y configurando WordPress en ${WEB_HOST}..."
                 sh """
                     ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                        sshpass -p "${ROOT_PASS}" su -c "
+                        sshpass -p "${ROOT_PASS}" su - -c "
                             apt update
                             apt install -y apache2 php php-mysql wget unzip
                             cd /var/www/html
@@ -83,4 +83,3 @@ pipeline {
         }
     }
 }
-
