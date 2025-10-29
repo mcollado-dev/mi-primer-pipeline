@@ -13,7 +13,7 @@ pipeline {
     stages {
         stage('Configurar Base de Datos') {
             steps {
-                sshagent(['ssh-key-rsa-debian-agent']) {
+                sshagent(['ssh-debian-agent']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SSH_USER}@${DB_HOST} '
                             sudo mysql -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME};"
@@ -28,7 +28,7 @@ pipeline {
 
         stage('Desplegar WordPress') {
             steps {
-                sshagent(['ssh-key-rsa-debian-agent']) {
+                sshagent(['ssh-debian-agent']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
                             sudo apt update
@@ -54,14 +54,23 @@ pipeline {
 
         stage('Verificar Despliegue') {
             steps {
-                sshagent(['ssh-key-rsa-debian-agent']) {
+                sshagent(['ssh-debian-agent']) {
                     sh """
                         ssh -o StrictHostKeyChecking=no ${SSH_USER}@${WEB_HOST} '
-                            curl -I http://localhost/wordpress | grep "200 OK"
+                            curl -I http://localhost/wordpress | grep "200 OK" && echo "WordPress responde correctamente."
                         '
                     """
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Despliegue de WordPress completado y conectado a MariaDB correctamente."
+        }
+        failure {
+            echo "Falló el despliegue. Revisa los logs del pipeline en Jenkins."
         }
     }
 }
